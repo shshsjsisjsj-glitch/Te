@@ -60,10 +60,11 @@ jobs:
           path: ${{ env.THEOS }}/sdks
           key: ${{ steps.cached-sdks-restore.outputs.cache-primary-key }}
 
+      # ✅ نزيل المسار الفرعي Te حتى ينسخ المشروع في الجذر مباشرة
       - name: Checkout your project
         uses: actions/checkout@v4
         with:
-          path: Te
+          path: .
           submodules: recursive
 
       - name: Setup build environment
@@ -72,15 +73,12 @@ jobs:
           echo "THEOS=$THEOS"
           echo "Building TrollSpeed project..."
 
-      # ✅ الحل النهائي لتصحيح المسار بالكامل
+      # ✅ التصحيح النهائي لمسار البناء
       - name: Build TrollSpeed (.tipa)
         run: |
-          cd $GITHUB_WORKSPACE
-          echo "Current directory: $(pwd)"
+          echo "Current workspace: $(pwd)"
           echo "Listing structure..."
           ls -R
-          cd Te
-          echo "Switched to project directory: $(pwd)"
           chmod +x build.sh
           ./build.sh 1.0
 
@@ -89,7 +87,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: TrollSpeed
-          path: ${{ github.workspace }}/Te/packages/*.tipa
+          path: packages/*.tipa
 
       # ✅ رفع تلقائي إلى Releases (اختياري)
       - name: Upload release (optional)
@@ -101,4 +99,4 @@ jobs:
           name: TrollSpeed v1.0
           body: "Automated TrollSpeed build via GitHub Actions"
           files: |
-            ${{ github.workspace }}/Te/packages/*.tipa
+            packages/*.tipa
