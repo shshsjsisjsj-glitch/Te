@@ -15,7 +15,7 @@ SCHEME_NAME="TrollSpeed"
 ARCHIVE_NAME="$PROJECT_NAME.xcarchive"
 APP_NAME="TrollSpeed.app"
 
-SUPPORTS_PATH="$GITHUB_WORKSPACE/supports"
+SUPPORTS_PATH="$GITHUB_WORKSPACE/../supports"
 
 echo "⚙️ Checking required files..."
 if [ ! -f "$SUPPORTS_PATH/entitlements.plist" ]; then
