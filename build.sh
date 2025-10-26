@@ -13,11 +13,11 @@ VERSION=${VERSION#v}
 
 # Build using Xcode
 xcodebuild clean build archive \
--scheme TrollSpeed \
--project TrollSpeed.xcodeproj \
+-scheme "TOX-HUD-和平" \
+-project "TOX-HUD-和平.xcodeproj" \
 -sdk iphoneos \
 -destination 'generic/platform=iOS' \
--archivePath TrollSpeed \
+-archivePath TOX-HUD-和平 \
 CODE_SIGNING_ALLOWED=NO | xcpretty
 
 cp supports/entitlements.plist TrollSpeed.xcarchive/Products
