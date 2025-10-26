@@ -54,9 +54,22 @@ cp -r "$APP_PATH" Payload/
 echo "🔧 Removing old signature..."
 codesign --remove-signature "Payload/$APP_NAME" || true
 
+# ✅ FIXED SECTION — smart ldid detection
 echo "🔑 Re-signing app..."
-/opt/homebrew/bin/ldid -Sentitlements.plist "Payload/$APP_NAME" || \
-ldid -Sentitlements.plist "Payload/$APP_NAME" || {
+if command -v ldid >/dev/null 2>&1; then
+    LDID_PATH=$(command -v ldid)
+elif [ -f "/usr/local/bin/ldid" ]; then
+    LDID_PATH="/usr/local/bin/ldid"
+elif [ -f "/opt/homebrew/bin/ldid" ]; then
+    LDID_PATH="/opt/homebrew/bin/ldid"
+else
+    echo "⚠️ ldid not found, installing via brew..."
+    brew install ldid || true
+    LDID_PATH=$(command -v ldid)
+fi
+
+echo "✅ Using ldid at: $LDID_PATH"
+"$LDID_PATH" -Sentitlements.plist "Payload/$APP_NAME" || {
     echo "❌ Error: ldid failed!"
     exit 1
 }
