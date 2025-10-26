@@ -3,7 +3,7 @@ TARGET := iphone:clang:latest:14.0
 INSTALL_TARGET_PROCESSES := TrollSpeed
 
 # المسارات الأساسية
-ENT_PLIST := $(THEOS_PROJECT_DIR)/supports/entitlements.plist
+ENT_PLIST := $(CURDIR)/supports/entitlements.plist
 LAUNCHD_PLIST := $(THEOS_PROJECT_DIR)/layout/Library/LaunchDaemons/ch.xxtou.hudapp.plist
 
 include $(THEOS)/makefiles/common.mk
