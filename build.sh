@@ -1,7 +1,6 @@
 #!/bin/sh
-
-# Build script for TOX-HUD-和平
-# Automatically builds and packages .tipa for TrollStore.
+# ✅ GitHub build script for TOX-HUD-和平 (Scheme: TrollSpeed)
+# Builds and packages .tipa for TrollStore
 
 if [ $# -ne 1 ]; then
     echo "Usage: $0 <version>"
@@ -14,11 +13,21 @@ VERSION=${VERSION#v}
 PROJECT_NAME="TOX-HUD-和平"
 SCHEME_NAME="TrollSpeed"
 ARCHIVE_NAME="$PROJECT_NAME.xcarchive"
-APP_NAME="$PROJECT_NAME.app"
+APP_NAME="TrollSpeed.app"
+
+SUPPORTS_PATH="$GITHUB_WORKSPACE/Te/supports"
+
+echo "⚙️ Checking required files..."
+if [ ! -f "$SUPPORTS_PATH/entitlements.plist" ]; then
+    echo "❌ Missing entitlements.plist in $SUPPORTS_PATH"
+    exit 1
+fi
+if [ ! -f "$SUPPORTS_PATH/Sandbox-Info.plist" ]; then
+    echo "❌ Missing Sandbox-Info.plist in $SUPPORTS_PATH"
+    exit 1
+fi
 
 echo "⚙️ Building $PROJECT_NAME (scheme: $SCHEME_NAME)..."
-
-# Clean + build + archive using Xcode
 xcodebuild clean build archive \
   -scheme "$SCHEME_NAME" \
   -project "$PROJECT_NAME.xcodeproj" \
@@ -27,40 +36,32 @@ xcodebuild clean build archive \
   -archivePath "$PROJECT_NAME" \
   CODE_SIGNING_ALLOWED=NO
 
-# Check that archive folder exists
 if [ ! -d "$ARCHIVE_NAME/Products/Applications" ]; then
     echo "❌ Error: Archive output not found!"
     exit 1
 fi
 
-# Copy entitlements
-cp supports/entitlements.plist "$ARCHIVE_NAME/Products" || exit 1
-
+cp "$SUPPORTS_PATH/entitlements.plist" "$ARCHIVE_NAME/Products"
 cd "$ARCHIVE_NAME/Products/Applications" || exit 1
 
-# Remove old signature
 echo "🔧 Removing old signature..."
 codesign --remove-signature "$APP_NAME" || true
 
 cd ../ || exit 1
-
-# Rename Applications -> Payload
 mv Applications Payload
 
-# Re-sign with ldid (installed from brew)
 echo "🔑 Re-signing app..."
 ldid -Sentitlements.plist "Payload/$APP_NAME" || {
-    echo "❌ ldid failed!"
+    echo "❌ Error: ldid failed!"
     exit 1
 }
 
-# Package as .tipa
-echo "📦 Creating .tipa package..."
+echo "📦 Creating .tipa..."
 zip -qr "$PROJECT_NAME.tipa" Payload
 
 cd ../../..
 mkdir -p packages
 mv "$ARCHIVE_NAME/Products/$PROJECT_NAME.tipa" "packages/${PROJECT_NAME}_${VERSION}.tipa"
 
-echo "✅ Build finished successfully!"
-echo "👉 Output: packages/${PROJECT_NAME}_${VERSION}.tipa"
+echo "✅ Done!"
+echo "📦 Output: packages/${PROJECT_NAME}_${VERSION}.tipa"
