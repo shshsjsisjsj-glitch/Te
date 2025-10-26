@@ -2,9 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>application-identifier</key>
-    <string>com.user.trollspeed</string>
-
+    <key>platform-application</key>
+    <true/>
     <key>com.apple.QuartzCore.displayable-context</key>
     <true/>
     <key>com.apple.QuartzCore.secure-mode</key>
@@ -25,8 +24,6 @@
     <true/>
     <key>com.apple.private.memorystatus</key>
     <true/>
-    <key>com.apple.private.persona-mgmt</key>
-    <true/>
     <key>com.apple.private.security.no-sandbox</key>
     <true/>
     <key>com.apple.springboard.CFUserNotification</key>
@@ -34,10 +31,6 @@
     <key>com.apple.springboard.accessibility-window-hosting</key>
     <true/>
     <key>com.apple.springboard.appbackgroundstyle</key>
-    <true/>
-    <key>file-read-data</key>
-    <true/>
-    <key>platform-application</key>
     <true/>
     <key>user-preference-read</key>
     <true/>
