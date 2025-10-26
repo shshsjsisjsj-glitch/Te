@@ -17,6 +17,9 @@ APP_NAME="TrollSpeed.app"
 SUPPORTS_PATH="$GITHUB_WORKSPACE/supports"
 
 echo "⚙️ Checking required files..."
+echo "🧭 Current directory: $(pwd)"
+ls -la
+
 if [ ! -f "$SUPPORTS_PATH/entitlements.plist" ]; then
     echo "❌ Missing entitlements.plist in $SUPPORTS_PATH"
     exit 1
@@ -50,7 +53,7 @@ cd ../ || exit 1
 mv Applications Payload
 
 echo "🔑 Re-signing app..."
-ldid -Sentitlements.plist "Payload/$APP_NAME" || {
+/opt/homebrew/bin/ldid -Sentitlements.plist "Payload/$APP_NAME" || ldid -Sentitlements.plist "Payload/$APP_NAME" || {
     echo "❌ Error: ldid failed!"
     exit 1
 }
