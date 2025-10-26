@@ -1,29 +1,94 @@
 name: Build TrollSpeed (.tipa)
 
 on:
-  workflow_dispatch:   # تشغيل يدوي
+  workflow_dispatch:
   push:
-    branches: [ main ] # أوتوماتيكي عند أي تعديل على main
+    branches: [ "main" ]
+
+env:
+  THEOS: ''
+  XCODE_VERSION: '15.1'
 
 jobs:
   build:
-    runs-on: macos-13   # نحتاج macOS لأنه يحتوي Xcode
+    runs-on: macos-13
 
     steps:
-      - name: Checkout repository
+      - name: Setup Xcode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Install Homebrew dependencies
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install dpkg ldid make libplist openssl@3 zip
+          echo "/usr/local/opt/make/libexec/gnubin" >> $GITHUB_PATH
+
+      - name: Checkout XXTouchNG/theos
         uses: actions/checkout@v4
+        with:
+          repository: XXTouchNG/theos
+          ref: 78ee784d8d3238982c9abdc58cd39919263648b1
+          path: theos
+          submodules: recursive
 
-      - name: Install dependencies
+      - name: Add THEOS environment variables
         run: |
-          brew install make dpkg ldid xcpretty zip
+          rm -rf $GITHUB_WORKSPACE/theos/sdks
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> $GITHUB_ENV
 
-      - name: Build using build.sh
+      - name: Restore additional SDKs
+        id: cached-sdks-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.THEOS }}/sdks
+          key: ${{ runner.os }}-sdks-${{ env.XCODE_VERSION }}
+
+      - if: ${{ steps.cached-sdks-restore.outputs.cache-hit != 'true' }}
+        name: Checkout theos/sdks
+        uses: actions/checkout@v4
+        with:
+          repository: theos/sdks
+          ref: master
+          path: ${{ env.THEOS }}/sdks
+
+      - if: ${{ steps.cached-sdks-restore.outputs.cache-hit != 'true' }}
+        name: Save SDKs
+        id: cached-sdks-save
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.THEOS }}/sdks
+          key: ${{ steps.cached-sdks-restore.outputs.cache-primary-key }}
+
+      - name: Checkout your project
+        uses: actions/checkout@v4
+        with:
+          path: TrollSpeed
+          submodules: recursive
+
+      - name: Setup build environment
         run: |
+          echo "Available SDKs: $(find $THEOS/sdks -name "*.sdk" -maxdepth 1 -print)"
+          echo "THEOS=$THEOS"
+          echo "Building TrollSpeed app..."
+
+      - name: Build TrollSpeed (.tipa)
+        run: |
+          cd $GITHUB_WORKSPACE/TrollSpeed
           chmod +x build.sh
           ./build.sh 1.0
 
-      - name: Upload .tipa file
+      - name: Upload artifact (.tipa)
         uses: actions/upload-artifact@v4
         with:
           name: TrollSpeed
-          path: packages/*.tipa
+          path: ${{ github.workspace }}/TrollSpeed/packages/*.tipa
+
+      - name: Upload release (optional)
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: "Automated TrollSpeed build"
+          files: |
+            ${{ github.workspace }}/TrollSpeed/packages/*.tipa
