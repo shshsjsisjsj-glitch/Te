@@ -72,23 +72,28 @@ jobs:
           echo "THEOS=$THEOS"
           echo "Building TrollSpeed app..."
 
+      # ✅ هنا أهم تعديل: العمل داخل المجلد الصحيح
       - name: Build TrollSpeed (.tipa)
+        working-directory: ${{ github.workspace }}/TrollSpeed/Te
         run: |
-          cd $GITHUB_WORKSPACE/TrollSpeed
-          chmod +x build.sh
-          ./build.sh 1.0
+          chmod +x ../build.sh
+          ../build.sh 1.0
 
+      # ✅ رفع ملف .tipa النهائي كـ artifact للتحميل
       - name: Upload artifact (.tipa)
         uses: actions/upload-artifact@v4
         with:
           name: TrollSpeed
-          path: ${{ github.workspace }}/TrollSpeed/packages/*.tipa
+          path: ${{ github.workspace }}/TrollSpeed/Te/packages/*.tipa
 
+      # ✅ رفع الملف تلقائياً إلى قسم Releases (اختياري)
       - name: Upload release (optional)
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/v')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          body: "Automated TrollSpeed build"
+          tag_name: v1.0
+          name: TrollSpeed v1.0
+          body: "Automated TrollSpeed build via GitHub Actions"
           files: |
-            ${{ github.workspace }}/TrollSpeed/packages/*.tipa
+            ${{ github.workspace }}/TrollSpeed/Te/packages/*.tipa
