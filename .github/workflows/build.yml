@@ -1,0 +1,27 @@
+name: Build TrollSpeed (.tipa)
+
+on:
+  workflow_dispatch:   # يمكنك تشغيله يدويًا من GitHub Actions
+
+jobs:
+  build:
+    runs-on: macos-13   # نحتاج macOS لأننا نستخدم xcodebuild
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install make dpkg ldid xcpretty
+
+      - name: Run build script
+        run: |
+          chmod +x build.sh
+          ./build.sh 1.0
+
+      - name: Upload TIPA file
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrollSpeed
+          path: packages/*.tipa
