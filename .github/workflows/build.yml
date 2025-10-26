@@ -72,21 +72,26 @@ jobs:
           echo "THEOS=$THEOS"
           echo "Building TrollSpeed project..."
 
-      # ✅ يعمل مباشرة داخل مجلد مشروعك Te
+      # ✅ الحل النهائي لتصحيح المسار بالكامل
       - name: Build TrollSpeed (.tipa)
-        working-directory: ${{ github.workspace }}/Te
         run: |
+          cd $GITHUB_WORKSPACE
+          echo "Current directory: $(pwd)"
+          echo "Listing structure..."
+          ls -R
+          cd Te
+          echo "Switched to project directory: $(pwd)"
           chmod +x build.sh
           ./build.sh 1.0
 
-      # ✅ رفع ملف .tipa كـ Artifact (لتحميله من صفحة Actions)
+      # ✅ رفع ملف .tipa كـ Artifact
       - name: Upload artifact (.tipa)
         uses: actions/upload-artifact@v4
         with:
           name: TrollSpeed
           path: ${{ github.workspace }}/Te/packages/*.tipa
 
-      # ✅ رفع تلقائي إلى GitHub Releases (اختياري)
+      # ✅ رفع تلقائي إلى Releases (اختياري)
       - name: Upload release (optional)
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/v')
